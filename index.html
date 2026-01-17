@@ -1,95 +1,73 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PNGStyle</title>
-  <style>
-    body { margin:0; font-family: Arial, sans-serif; background:#f2f2f2; }
-    header { background:#1877f2; color:#fff; padding:12px; text-align:center; font-size:20px; font-weight:bold; }
-    nav { display:flex; justify-content:space-around; background:#fff; border-bottom:1px solid #ddd; }
-    nav button { flex:1; padding:10px; border:none; background:none; font-weight:bold; }
-    nav button.active { color:#1877f2; border-bottom:2px solid #1877f2; }
-    section { display:none; padding:10px; }
-    section.active { display:block; }
-    .card { background:#fff; padding:10px; margin-bottom:10px; border-radius:8px; }
-    .actions { display:flex; justify-content:space-around; margin-top:8px; }
-    .actions button { border:none; background:#eee; padding:6px 10px; border-radius:6px; }
-    input, textarea { width:100%; padding:8px; margin:5px 0; }
-    .btn { background:#1877f2; color:#fff; padding:8px; border:none; width:100%; border-radius:6px; }
-    footer { text-align:center; font-size:12px; color:#666; margin:20px 0; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PNGStyle</title>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
+<style>
+body{font-family:Arial;margin:0;background:#f4f4f4}
+header{background:#0a5cff;color:white;padding:15px;text-align:center;font-size:22px}
+.card{background:white;margin:10px;padding:15px;border-radius:8px}
+button{background:#0a5cff;color:white;border:none;padding:10px;border-radius:5px}
+input{width:100%;padding:8px;margin:6px 0}
+img{max-width:100%;border-radius:8px;margin-top:10px}
+</style>
 </head>
-<body><header>PNGStyle</header><nav>
-  <button class="active" onclick="showTab('home')">Home</button>
-  <button onclick="showTab('videos')">Videos</button>
-  <button onclick="showTab('market')">Market</button>
-  <button onclick="showTab('profile')">Profile</button>
-  <button onclick="showTab('about')">About</button>
-</nav><section id="home" class="active">
-  <div class="card">
-    <h3>Welcome to PNGStyle</h3>
-    <p>Your independent PNG app for posts, videos and market.</p>
-  </div>  <div class="card">
-    <textarea id="postText" placeholder="What's on your mind?"></textarea>
-    <button class="btn" onclick="addPost()">Post</button>
-  </div>  <div id="feed"></div>
-</section><section id="videos">
-  <div class="card">
-    <h3>Videos</h3>
-    <video controls width="100%">
-      <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
-    </video>
-  </div>
-</section><section id="market">
-  <div class="card">
-    <h3>Marketplace</h3>
-    <p>Sell and buy items (coming soon)</p>
-    <button class="btn">Post Item</button>
-  </div>
-</section><section id="profile">
-  <div class="card">
-    <h3>User Profile</h3>
-    <input id="username" placeholder="Enter username" />
-    <button class="btn" onclick="saveUser()">Login / Save</button>
-    <p id="userDisplay"></p>
-  </div>
-</section><section id="about">
-  <div class="card">
-    <h3>About PNGStyle</h3>
-    <p>PNGStyle is a local social platform built for Papua New Guinea.</p>
-    <p>More features coming soon.</p>
-  </div>
-</section><footer>© 2026 PNGStyle. All rights reserved.</footer><script>
-  function showTab(tab) {
-    document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
-    document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
-    event.target.classList.add('active');
-    document.getElementById(tab).classList.add('active');
-  }
 
-  function addPost() {
-    let text = document.getElementById('postText').value;
-    if(!text) return;
-    let post = document.createElement('div');
-    post.className = 'card';
-    post.innerHTML = `<p>${text}</p>
-      <div class="actions">
-        <button>👍 Like</button>
-        <button>💬 Comment</button>
-        <button>↗ Share</button>
-        <button>⭐ Save</button>
-      </div>`;
-    document.getElementById('feed').prepend(post);
-    document.getElementById('postText').value='';
-  }
+<body>
 
-  function saveUser() {
-    let u = document.getElementById('username').value;
-    localStorage.setItem('pngstyle_user', u);
-    document.getElementById('userDisplay').innerText = 'Logged in as: ' + u;
-  }
+<header>PNGStyle</header>
 
-  let saved = localStorage.getItem('pngstyle_user');
-  if(saved) document.getElementById('userDisplay').innerText = 'Logged in as: ' + saved;
-</script></body>
-  </html>
+<div class="card">
+<h3>Login / Sign Up</h3>
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+<button onclick="login()">Login / Sign Up</button>
+</div>
+
+<div class="card">
+<h3>Upload Image</h3>
+<input type="file" id="file">
+<button onclick="upload()">Upload</button>
+<div id="images"></div>
+</div>
+
+<script>
+// 🔴 REPLACE WITH YOUR FIREBASE CONFIG
+const firebaseConfig = {
+  apiKey: "PASTE_HERE",
+  authDomain: "PASTE_HERE",
+  projectId: "PASTE_HERE",
+  storageBucket: "PASTE_HERE"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const storage = firebase.storage();
+
+function login(){
+  const email = email.value;
+  const password = password.value;
+  auth.signInWithEmailAndPassword(email,password)
+  .catch(()=>auth.createUserWithEmailAndPassword(email,password))
+  .alert("Logged in!");
+}
+
+function upload(){
+  const file = document.getElementById("file").files[0];
+  const ref = storage.ref("images/"+Date.now()+file.name);
+  ref.put(file).then(()=>{
+    ref.getDownloadURL().then(url=>{
+      images.innerHTML += `<img src="${url}">`;
+    });
+  });
+}
+</script>
+
+</body>
+</html>
